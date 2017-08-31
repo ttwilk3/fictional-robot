@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Test Project</title>
+
+    <link rel="stylesheet" href="../Resources/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+</head>
+<body ng-app="testProject">
+<div ng-controller="NavController" ng-include="'common/partials/nav.html'"></div>
+
+<div ng-view></div>
+<!--Javascript Files-->
+<script src="../Resources/Angular/angular-1.6.4/angular.min.js"></script>
+<script src="../Resources/Angular/angular-1.6.4/angular-animate.min.js"></script>
+<script src="../Resources/Angular/angular-1.6.4/angular-route.min.js"></script>
+<script src="../Resources/Angular/angular-1.6.4/angular-resource.min.js"></script>
+<script src="../Resources/Angular/angular-1.6.4/angular-loader.min.js"></script>
+<script src="../Resources/Angular/ui-bootstrap-tpls-2.5.0.min.js"></script>
+
+<!--Application Specific JS-->
+<script src="scripts/app.js"></script>
+
+<!--Application Modules-->
+<script src="common/common.js"></script>
+<script src="common/controllers/NavController.js"></script>
+<script src="common/controllers/DeleteController.js"></script>
+<!--Application Filters-->
+
+<!--Application Directives-->
+<!--<script src="common/directives/ngEnterDirective.js></script>"-->
+
+<!--Angular Services-->
+<script src="common/services/AdminService.js"></script>
+<!--Home Module-->
+
+<!--Form Module-->
+<script src="form/form.js"></script>
+<script src="form/controllers/TestController.js"></script>
+<script src="common/services/FormService.js"></script>
+</body>
+</html>
