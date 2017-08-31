@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvisementSoftware", "AdvisementSoftware\AdvisementSoftware.csproj", "{A07DE4D2-1BD2-4434-8C2E-F9128D9BE96E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvisementSoftware.Tests", "AdvisementSoftware.Tests\AdvisementSoftware.Tests.csproj", "{B02608D1-BC40-4C4B-A109-61584CBB75A5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A07DE4D2-1BD2-4434-8C2E-F9128D9BE96E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A07DE4D2-1BD2-4434-8C2E-F9128D9BE96E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A07DE4D2-1BD2-4434-8C2E-F9128D9BE96E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A07DE4D2-1BD2-4434-8C2E-F9128D9BE96E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B02608D1-BC40-4C4B-A109-61584CBB75A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B02608D1-BC40-4C4B-A109-61584CBB75A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B02608D1-BC40-4C4B-A109-61584CBB75A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B02608D1-BC40-4C4B-A109-61584CBB75A5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
