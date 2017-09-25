@@ -26,5 +26,12 @@ namespace AdvisementSoftware.Controllers
 
             return View();
         }
+
+        public ActionResult Profile()
+        {
+            ViewBag.Message = "";
+
+            return View();
+        }
     }
 }
