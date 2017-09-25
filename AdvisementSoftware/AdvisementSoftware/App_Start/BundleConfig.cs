@@ -24,7 +24,7 @@ namespace AdvisementSoftware
                       "~/Scripts/respond.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
-                      "~/Content/bootstrap.css",
+                      "~/Content/bootstrap-readable-theme.css",
                       "~/Content/site.css"));
         }
     }
