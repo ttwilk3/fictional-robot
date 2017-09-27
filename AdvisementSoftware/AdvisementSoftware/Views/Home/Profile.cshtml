@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+#classes {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#classes td, #classes th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#classes tr:nth-child(even){background-color: #f2f2f2;}
+
+#classes tr:hover {background-color: #ddd;}
+
+#classes th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+</style>
+
+<div class="jumbotron">
+    <h2>@User.Identity.Name 's Profile</h2>
+</div>
+
+<div>
+    <p><a href="" class="btn btn-primary btn-sm">Edit Classes&raquo;</a></p>
+    <table id="classes">
+        <tr>
+            <th>Course ID</th>
+            <th>Course Name</th>
+            <th>Semester/Year</th>
+            <th>Comment</th>
+        </tr>
+        <tr>
+            <td>CSCI 1301</td>
+            <td>Principles of Comp Program I</td>
+            <td>FA 16</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ENGL 1101</td>
+            <td>College Composition I</td>
+            <td>FA 16</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>MATH 1113</td>
+            <td>Precalculus Mathematics</td>
+            <td>FA 16</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>PHYS 1111</td>
+            <td>Introductory Physics I</td>
+            <td>FA 16</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CSCI 1302</td>
+            <td>Principles of Comp Program II</td>
+            <td>SP 17</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ENGL 1102</td>
+            <td>College Composition II</td>
+            <td>SP 17</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>MATH 2011</td>
+            <td>Calculus & Analy. Geometry I</td>
+            <td>SP 17</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>PHYS 1112</td>
+            <td>Introductory Physics II</td>
+            <td>SP 17</td>
+            <td></td>
+        </tr>
+    </table>
+    <br />
+    <p>
+        <a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-primary btn-sm" target="_blank">Generate Schedule&raquo;</a>
+        <select>
+            <option value="C1415">Catalog 2014-2015</option>
+            <option value="C1516">Catalog 2015-2016</option>
+            <option value="C1617">Catalog 2016-2017</option>
+            <option value="C1718">Catalog 2017-2018</option>
+        </select>
+    </p>
+
+</div>
