@@ -33,5 +33,19 @@ namespace AdvisementSoftware.Controllers
 
             return View();
         }
+
+        public ActionResult ViewCatalog()
+        {
+            ViewBag.Message = "";
+
+            return View();
+        }
+
+        public ActionResult ViewCourses()
+        {
+            ViewBag.Message = "";
+
+            return View();
+        }
     }
 }
