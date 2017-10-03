@@ -6,6 +6,11 @@
     <title>@ViewBag.Title - CSAS</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jsgrid")
+    @Styles.Render("~/Content/jsgrid")
+    @RenderSection("scripts", required: false)
 
 </head>
 <body>
@@ -42,9 +47,5 @@
             <p>&copy; @DateTime.Now.Year - Augusta University</p>
         </footer>
     </div>
-
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
 </body>
 </html>

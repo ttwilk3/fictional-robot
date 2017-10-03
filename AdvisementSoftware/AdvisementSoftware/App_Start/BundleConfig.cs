@@ -26,6 +26,13 @@ namespace AdvisementSoftware
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap-readable-theme.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jsgrid").Include(
+                        "~/Scripts/jsgrid.min.js"));
+
+            bundles.Add(new StyleBundle("~/Content/jsgrid").Include(
+                      "~/Content/jsgrid-theme.min.css",
+                      "~/Content/jsgrid.min.css"));
         }
     }
 }
