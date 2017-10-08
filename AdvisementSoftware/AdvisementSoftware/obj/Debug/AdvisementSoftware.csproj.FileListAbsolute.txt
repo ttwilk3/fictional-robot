@@ -86,3 +86,6 @@ C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftwar
 C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.csprojResolveAssemblyReference.cache
 C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.dll
 C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.pdb
+C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.Migrations.InitialCreate.resources
+C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.csproj.GenerateResource.Cache
+C:\Users\lohru\Source\Repos\fictional-robot\AdvisementSoftware\AdvisementSoftware\obj\Debug\AdvisementSoftware.Migrations.Name.resources

@@ -20,6 +20,8 @@
         { "CourseID": "MATH2011", "CourseName": "MATH2011", "Semester": "FA 16", "CreditHours": "3" },
         { "CourseID": "MATH2012", "CourseName": "MATH2012", "Semester": "FA 17", "CreditHours": "3" }
     ];
+    
+    var vals;
 
     var creditHours = [
         { Name: "1", Id: "1" },
@@ -46,6 +48,22 @@
         { Name: "SP FA", Id: 3 }
     ];
     $(document).ready(function () {
+        function callDB() {
+            $.ajax({
+                type: 'POST',
+                url: '/Shared/getCourses',
+                contentType: 'application/json',
+                /*data: query,*/
+                async: false
+            })
+            .done(function (values) {
+                //console.log(values);
+                vals = JSON.parse(values);
+            })
+            .fail(function () { })
+        }
+        callDB();
+        console.log(vals);
         $("#jsGrid").jsGrid({
             width: "100%",
             height: "400px",
