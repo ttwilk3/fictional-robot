@@ -232,6 +232,8 @@
     <Content Include="Content\bootstrap-readable-theme.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\images\mdowell.jpg" />
+    <Content Include="Content\images\UnderConstruct.jpg" />
     <Content Include="Content\jsgrid-theme.min.css" />
     <Content Include="Content\jsgrid.min.css" />
     <Content Include="Content\jsgrid.min.js" />
