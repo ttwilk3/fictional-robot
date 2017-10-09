@@ -9,61 +9,26 @@
         { "Name": "Timothy Henson", "Age": 56, "Country": 1, "Address": "911-5143 Luctus Ave", "Married": true },
         { "Name": "Ramona Benton", "Age": 32, "Country": 3, "Address": "Ap #614-689 Vehicula Street", "Married": false }
     ];*/
-
-    var classes = [
-        { "CourseID": "CSCI1301", "CourseName": "CSCI1301", "Semester": "FA 16", "CreditHours": "4" },
-        { "CourseID": "CSCI1302", "CourseName": "CSCI1302", "Semester": "FA 17", "CreditHours": "3" },
-        { "CourseID": "ENGL1101", "CourseName": "ENGL1101", "Semester": "FA 16", "CreditHours": "3" },
-        { "CourseID": "ENGL1102", "CourseName": "ENGL1102", "Semester": "FA 17", "CreditHours": "3" },
-        { "CourseID": "PHYS1111", "CourseName": "PHYS1111", "Semester": "FA 16", "CreditHours": "4" },
-        { "CourseID": "PHYS1112", "CourseName": "PHYS1112", "Semester": "FA 17", "CreditHours": "4" },
-        { "CourseID": "MATH2011", "CourseName": "MATH2011", "Semester": "FA 16", "CreditHours": "3" },
-        { "CourseID": "MATH2012", "CourseName": "MATH2012", "Semester": "FA 17", "CreditHours": "3" }
-    ];
     
-    var vals;
+    var userProfile;
 
-    var creditHours = [
-        { Name: "1", Id: "1" },
-        { Name: "2", Id: "2" },
-        { Name: "3", Id: "3" },
-        { Name: "4", Id: "4" }
-    ];
-
-    var courseName = [
-        { Name: "Principles of Comp Program I", Id: "CSCI1301" },
-        { Name: "Principles of Comp Program II", Id: "CSCI1302" },
-        { Name: "College Composition I", Id: "ENGL1101" },
-        { Name: "College Composition II", Id: "ENGL1102" },
-        { Name: "Introductory Physics I", Id: "PHYS1111" },
-        { Name: "Introductory Physics II", Id: "PHYS1112" },
-        { Name: "Calculus & Analy. Geometry I", Id: "MATH2011" },
-        { Name: "Calculus & Analy. Geometry II", Id: "MATH2012" }
-    ];
-
-    var semester = [
-        { Name: "SP", Id: 0 },
-        { Name: "SU", Id: 1 },
-        { Name: "FA", Id: 2 },
-        { Name: "SP FA", Id: 3 }
-    ];
     $(document).ready(function () {
         function callDB() {
             $.ajax({
                 type: 'POST',
-                url: '/Shared/getCourses',
+                url: '/Shared/getProfile',
                 contentType: 'application/json',
                 /*data: query,*/
                 async: false
             })
-            .done(function (values) {
+            .done(function (profileData) {
                 //console.log(values);
-                vals = JSON.parse(values);
+                userProfile = JSON.parse(profileData);
             })
             .fail(function () { })
         }
         callDB();
-        console.log(vals);
+        console.log(userProfile);
         $("#jsGrid").jsGrid({
             width: "100%",
             height: "400px",
@@ -73,13 +38,13 @@
             sorting: true,
             paging: true,
 
-            data: classes,
+            data: userProfile,
 
             fields: [
-                { name: "CourseID", type: "select", items: courseName, valueField: "Id", textField: "Id", validate: "required" },
-                { name: "CourseName", type: "select", items: courseName, valueField: "Id", textField: "Name", validate: "required" },
-                { name: "Semester", type: "text", validate: "required" },
-                { name: "CreditHours", type: "select", items: creditHours, valueField: "Id", textField: "Name", validate: "required" },
+                { name: "CourseID", type: "text", validate: "required" },
+                { name: "CourseName", type: "text", validate: "required" },
+                { name: "CreditHours", type: "text", validate: "required" },
+                { name: "Comment", type: "text"},
                 { type: "control"}
                 /*
                 { name: "Name", type: "text", width: 150, validate: "required" },
