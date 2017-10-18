@@ -12,6 +12,49 @@ namespace AdvisementSoftware.Controllers
 {
     public class SharedController : Controller
     {
+
+        public void addCourse(Course json)
+        {
+            //Course newCourse = JsonConvert.DeserializeObject<Course>((string)json);
+            string userName = User.Identity.Name;
+            string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
+            DataTable table = new DataTable();
+
+            try
+            {
+                string path = System.IO.Directory.GetCurrentDirectory();
+
+                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(table);
+
+                string userID = table.Rows[0][0].ToString();
+
+                string insertCommand = "INSERT INTO USERPROFILE (UserID, CourseID) VALUES ('" + userID + "', '" + json.CourseID + "')";
+
+                SqlCommand ins = new SqlCommand(insertCommand);
+
+                ins.Connection = new SqlConnection(connectionString);
+
+                ins.Connection.Open();
+
+                ins.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public void deleteCourseFromProfile()
+        {
+
+        }
        public class Course
         {
             public string CourseID { get; set; }
