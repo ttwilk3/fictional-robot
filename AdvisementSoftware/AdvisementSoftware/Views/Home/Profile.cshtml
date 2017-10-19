@@ -56,7 +56,7 @@
         getProfile();
         getCourses();
         //console.log(userProfile);
-        console.log(courses);
+        //console.log(courses);
         for (var i = 0; i < courses.length; i++) {
             $('#courses').append('<option value=' + i + '>' + courses[i].CourseID + ' ' + courses[i].CourseName + '</option>');
         }
@@ -79,12 +79,14 @@
             deleteConfirm: "Are you sure?",
 
             deleteItem: function (item) {
-                $.ajax({
-                    type: "DELETE",
-                    url: '/Shared/deleteCourseFromProfile',
-                    data: item
-                });
-                location.reload();
+                if (window.confirm("Are you sure?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: '/Shared/deleteCourseFromProfile',
+                        data: item
+                    });
+                    location.reload();
+                }
             },
 
             data: userProfile,
@@ -94,7 +96,7 @@
                 { name: "CourseName"},/*, type: "text", validate: "required" },*/
                 { name: "CreditHours"},
                 { name: "Comment"},
-                { type: "control"}
+                { type: "control", editButton: false}
                 /*
                 { name: "Name", type: "text", width: 150, validate: "required" },
                 { name: "Age", type: "number", width: 50 },
