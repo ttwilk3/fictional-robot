@@ -16,25 +16,11 @@ namespace AdvisementSoftware.Controllers
         public void addCourse(Course json)
         {
             //Course newCourse = JsonConvert.DeserializeObject<Course>((string)json);
-            string userName = User.Identity.Name;
-            string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
-            DataTable table = new DataTable();
-
             try
             {
-                string path = System.IO.Directory.GetCurrentDirectory();
-
                 string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
-                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
-
-                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
-
-                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
-
-                dataAdapter.Fill(table);
-
-                string userID = table.Rows[0][0].ToString();
+                string userID = getUserID();
 
                 string insertCommand = "INSERT INTO USERPROFILE (UserID, CourseID) VALUES ('" + userID + "', '" + json.CourseID + "')";
 
@@ -51,10 +37,31 @@ namespace AdvisementSoftware.Controllers
             }
         }
 
-        public void deleteCourseFromProfile()
+        public void deleteCourseFromProfile(Course item)
         {
+            try
+            {
+                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
+                string userID = getUserID();
+
+                string delCom = "DELETE FROM USERPROFILE WHERE UserID = '" + userID + "' AND CourseID = '" + item.CourseID + "'";
+
+                SqlCommand del = new SqlCommand(delCom);
+
+                del.Connection = new SqlConnection(connectionString);
+
+                del.Connection.Open();
+
+                del.ExecuteNonQuery();
+
+            }
+            catch
+            {
+
+            }
         }
+        
        public class Course
         {
             public string CourseID { get; set; }
@@ -122,42 +129,29 @@ namespace AdvisementSoftware.Controllers
 
         public string getProfile()
         {
-            string userName = User.Identity.Name;
             DataTable table = new DataTable();
-            DataTable table2 = new DataTable();
-            string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
             string findProfile = "SELECT USERPROFILE.CourseID, COURSES.CourseName, COURSES.CreditHours, USERPROFILE.Comment FROM ASPNETUSERS INNER JOIN USERPROFILE ON USERPROFILE.UserID = '";
             try
             {
+                string userID = getUserID();
+
+                findProfile += userID + "' INNER JOIN COURSES ON USERPROFILE.CourseID = COURSES.CourseID";
+
                 string path = System.IO.Directory.GetCurrentDirectory();
 
                 string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
-                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findProfile, connectionString);
 
                 SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
 
-                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
-
                 dataAdapter.Fill(table);
 
-                string userID = table.Rows[0][0].ToString();
-
-
-
-                findProfile += userID + "' INNER JOIN COURSES ON USERPROFILE.CourseID = COURSES.CourseID";
-
-                dataAdapter = new SqlDataAdapter(findProfile, connectionString);
-
-                commandBuilder = new SqlCommandBuilder(dataAdapter);
-
-                dataAdapter.Fill(table2);
-
                 List<UserProfile> ups = new List<UserProfile>();
-                foreach (DataRow r in table2.Rows)
+                foreach (DataRow r in table.Rows)
                 {
                     UserProfile up = new UserProfile();
-                    foreach (DataColumn c in table2.Columns)
+                    foreach (DataColumn c in table.Columns)
                     {
                         //CourseID
                         //CourseName
@@ -186,6 +180,33 @@ namespace AdvisementSoftware.Controllers
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        public string getUserID()
+        {
+            string userName = User.Identity.Name;
+            DataTable table = new DataTable();
+            string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
+            try
+            {
+                string path = System.IO.Directory.GetCurrentDirectory();
+
+                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(table);
+
+                return table.Rows[0][0].ToString();
+            }
+            catch
+            {
+                return "";
             }
         }
     }

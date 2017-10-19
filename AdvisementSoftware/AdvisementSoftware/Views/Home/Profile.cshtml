@@ -79,11 +79,12 @@
             deleteConfirm: "Are you sure?",
 
             deleteItem: function (item) {
-                return $.ajax({
+                $.ajax({
                     type: "DELETE",
-                    url: "/items",
+                    url: '/Shared/deleteCourseFromProfile',
                     data: item
                 });
+                location.reload();
             },
 
             data: userProfile,
