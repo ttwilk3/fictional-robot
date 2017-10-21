@@ -7,19 +7,149 @@ using Newtonsoft.Json.Serialization;
 using System.Data.SqlClient;
 using System.Data;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace AdvisementSoftware.Controllers
 {
     public class SharedController : Controller
     {
 
+        string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+        public class Catalog
+        {
+            public string Year { get; set; }
+        }
+
+        public class Prerequisite
+        {
+            public string CourseID { get; set; }
+            public string Prereq { get; set; } 
+
+            public string BooleanExp { get; set; }
+
+            public bool PrereqMet { get; set; }
+
+            public Prerequisite(string _courseID, string _prereq)
+            {
+                CourseID = _courseID;
+                Prereq = _prereq;
+                BooleanExp = _prereq;
+            }
+        }
+
+        public string generateSchedule(Catalog catalogSelection)
+        {
+            DataTable catalog = new DataTable();
+            DataTable userProfile = new DataTable();
+            List<Prerequisite> catalogClasses = new List<Prerequisite>();
+            List<string> userClasses = new List<string>();
+
+            try
+            {
+                string userID = getUserID();
+
+                /*Get Catalog*/
+
+                //string getCatalog = "SELECT * FROM CATALOGS WHERE CatalogYear = '" + catalogSelection.Year + "'";
+                string getCatalog = "SELECT CATALOGS.CourseID, COURSES.Prereq FROM CATALOGS INNER JOIN COURSES ON CATALOGS.CourseID = COURSES.CourseID";
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalog, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                catalog.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(catalog);
+
+                /*Get User*/
+
+                string getUser = "SELECT CourseID FROM USERPROFILE WHERE UserID = '" + userID + "'";
+
+                dataAdapter = new SqlDataAdapter(getUser, connectionString);
+
+                commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                userProfile.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(userProfile);
+
+                if (catalog.Rows.Count > 0 && userProfile.Rows.Count > 0)
+                {
+                    foreach (DataRow r in catalog.Rows)
+                    {
+                        catalogClasses.Add(new Prerequisite(r["CourseID"].ToString(), r["Prereq"].ToString()));
+                    }
+
+                    foreach (DataRow r in userProfile.Rows)
+                    {
+                        userClasses.Add(r["CourseID"].ToString());
+                    }
+
+                    for (int i = catalogClasses.Count - 1; i >= 0; i--)
+                    {
+                        foreach (string s in userClasses)
+                        {
+                            if (s.Equals(catalogClasses[i].CourseID))
+                            {
+                                catalogClasses.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < catalogClasses.Count; i++)
+                    {
+                        Match result = Regex.Match(catalogClasses[i].Prereq, @"([A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9])");
+
+                        List<string> matches = new List<string>();
+                        Match temp = result;
+                        while (temp.Success == true)
+                        {
+                            matches.Add(temp.Value);
+                            temp = temp.NextMatch();
+                        }
+
+                        foreach (string s in matches)
+                        {
+                            if (userClasses.Contains(s))
+                            {
+                                //expression.Replace(s, "true");
+                                catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "True");
+                            }
+                            else
+                            {
+                                catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "False");
+                            }
+                        }
+
+                        if (catalogClasses[i].BooleanExp.Length > 0)
+                            catalogClasses[i].BooleanExp = catalogClasses[i].BooleanExp.Replace("&", " and ").Replace("|", " or ").Replace("&&", " and ").Replace("||", " or ").Replace("!true", "False").Replace("!false", "True").Replace("!True", "False").Replace("!False", "True");
+                        else
+                            catalogClasses[i].BooleanExp = "(True)";
+
+                        DataTable dt = new DataTable();
+                        var val = dt.Compute(catalogClasses[i].BooleanExp, string.Empty);
+                        catalogClasses[i].PrereqMet = Convert.ToBoolean(val);
+                    }
+
+                    //Console.WriteLine(catalogClasses);
+                    string json = JsonConvert.SerializeObject(catalogClasses);
+                    return json;
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            return null;
+        }
+
         public void addCourse(Course json)
         {
             //Course newCourse = JsonConvert.DeserializeObject<Course>((string)json);
             try
             {
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
                 string userID = getUserID();
 
                 string insertCommand = "INSERT INTO USERPROFILE (UserID, CourseID) VALUES ('" + userID + "', '" + json.CourseID + "')";
@@ -41,8 +171,6 @@ namespace AdvisementSoftware.Controllers
         {
             try
             {
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
                 string userID = getUserID();
 
                 string delCom = "DELETE FROM USERPROFILE WHERE UserID = '" + userID + "' AND CourseID = '" + item.CourseID + "'";
@@ -75,10 +203,6 @@ namespace AdvisementSoftware.Controllers
             string selectCommand = "SELECT * FROM COURSES";
             try
             {
-                string path = System.IO.Directory.GetCurrentDirectory();
-
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(selectCommand, connectionString);
 
                 SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
@@ -139,8 +263,6 @@ namespace AdvisementSoftware.Controllers
 
                 string path = System.IO.Directory.GetCurrentDirectory();
 
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(findProfile, connectionString);
 
                 SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
@@ -191,8 +313,6 @@ namespace AdvisementSoftware.Controllers
             try
             {
                 string path = System.IO.Directory.GetCurrentDirectory();
-
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
 

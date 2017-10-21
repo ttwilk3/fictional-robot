@@ -5,6 +5,32 @@
     var userProfile;
     var courses;
 
+    function generateSchedule() {
+        var catalogVal = {
+            Year: $("#catalogs").val()
+            }
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/generateSchedule',
+            contentType: 'application/json',
+            data: catalogVal,
+            async: false
+        })
+           .done(function (schedule) {
+               //console.log(schedule);
+               schedule = JSON.parse(schedule);
+               console.log(schedule);
+               $("#schedule").append("</br></br><h2>Schedule</h2>");
+               $("#schedule").append("<table>");
+               $("#schedule").append("<tr><th>Course ID</th><th>Prereq</th><th>Prereq Met</th></tr>");
+               for (var i = 0; i < schedule.length; i++) {
+                   $("#schedule").append("<tr><td>" + schedule[i].CourseID + "</td><td>" + schedule[i].Prereq + "</td><td>" + schedule[i].PrereqMet +"</td></tr>");
+               }
+               $("#schedule").append("</table>");
+           })
+           .fail(function () {})
+    }
+
     function addCourse() {
         var tempCourse = courses[$("#courses").val()];
         console.log(tempCourse);
@@ -109,30 +135,29 @@
     });
 </script>
 
-<!--<style>
-#classes {
+<style>
+#schedule {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
 }
 
-#classes td, #classes th {
+#schedule td, #classes th {
     border: 1px solid #ddd;
     padding: 8px;
 }
 
-#classes tr:nth-child(even){background-color: #f2f2f2;}
+#schedule tr:nth-child(even){background-color: #f2f2f2;}
 
-#classes tr:hover {background-color: #ddd;}
+#schedule tr:hover {background-color: #ddd;}
 
-#classes th {
-    padding-top: 12px;
-    padding-bottom: 12px;
+#schedule th {
+    padding: 12px 12px 12px 12px;
     text-align: left;
     background-color: #4CAF50;
     color: white;
 }
-</style>-->
+</style>
 
 <div class="jumbotron">
     <h2>@User.Identity.Name 's Profile</h2>
@@ -147,14 +172,17 @@
 
 <div id="jsGrid"></div>
 <div>
-    <select>
-        <option value="C1415">Catalog 2014-2015</option>
-        <option value="C1516">Catalog 2015-2016</option>
-        <option value="C1617">Catalog 2016-2017</option>
-        <option value="C1718">Catalog 2017-2018</option>
+    <select id="catalogs">
+        <option value="20142015">Catalog 2014-2015</option>
+        <option value="20152016">Catalog 2015-2016</option>
+        <option value="20162017">Catalog 2016-2017</option>
+        <option value="20172018">Catalog 2017-2018</option>
     </select>
-    <a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-success btn-sm" target="_blank" style="font-size: 15pt;">Generate Schedule&raquo;</a>
+    <!--<a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-success btn-sm" target="_blank" style="font-size: 15pt;">Generate Schedule&raquo;</a>-->
+    <button class="btn btn-success btn-sm" style="font-size: 15pt;"onclick="generateSchedule()">Generate Schedule&raquo;</button>
 </div>
+
+<div id="schedule"></div>
 <!--<div>
     <p><a href="" class="btn btn-primary btn-sm">Edit Classes&raquo;</a></p>
     <table id="classes">
