@@ -98,6 +98,7 @@ namespace AdvisementSoftware.Controllers
                         }
                     }
 
+                    List<string> allNeededPrereqs = new List<string>();
                     for (int i = 0; i < catalogClasses.Count; i++)
                     {
                         Match result = Regex.Match(catalogClasses[i].Prereq, @"([A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9])");
@@ -107,6 +108,7 @@ namespace AdvisementSoftware.Controllers
                         while (temp.Success == true)
                         {
                             matches.Add(temp.Value);
+                            allNeededPrereqs.Add(temp.Value);
                             temp = temp.NextMatch();
                         }
 
@@ -132,7 +134,15 @@ namespace AdvisementSoftware.Controllers
                         var val = dt.Compute(catalogClasses[i].BooleanExp, string.Empty);
                         catalogClasses[i].PrereqMet = Convert.ToBoolean(val);
                     }
+                    allNeededPrereqs = allNeededPrereqs.Distinct().ToList();
 
+                    for (int i = allNeededPrereqs.Count - 1; i >= 0; i--)
+                    {
+                        if (userClasses.Contains(allNeededPrereqs[i]))
+                        {
+                            allNeededPrereqs.RemoveAt(i);
+                        }
+                    }
                     //Console.WriteLine(catalogClasses);
                     string json = JsonConvert.SerializeObject(catalogClasses);
                     return json;
