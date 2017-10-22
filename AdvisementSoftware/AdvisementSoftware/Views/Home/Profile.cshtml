@@ -6,8 +6,10 @@
     var courses;
 
     function generateSchedule() {
+        //console.log($("#electiveHours").val());
         var catalogVal = {
-            Year: $("#catalogs").val()
+            Year: $("#catalogs").val(),
+            ElectiveHours: $("#electiveHours").val()
             }
         $.ajax({
             type: 'GET',
@@ -19,14 +21,49 @@
            .done(function (schedule) {
                //console.log(schedule);
                schedule = JSON.parse(schedule);
-               console.log(schedule);
+               //console.log(schedule);
+               var d = new Date();
+               var monthNum = d.getMonth() + 1;
+               var yearNum = d.getFullYear();
+               //console.log(monthNum);
+
+               var semester = "";
+               if (monthNum < 8){
+                   semester = "Fall" 
+               }
+               else {
+                   semester = "Spring";
+                   yearNum += 1;
+               }
+
                $("#schedule").append("</br></br><h2>Schedule</h2>");
+               $("#schedule").append("<i><h4 style=\"color:red;\">Based on the " + $("#catalogs").val() + " Catalog</h4></i>");
                $("#schedule").append("<table>");
-               $("#schedule").append("<tr><th>Course ID</th><th>Prereq</th><th>Prereq Met</th></tr>");
                for (var i = 0; i < schedule.length; i++) {
-                   $("#schedule").append("<tr><td>" + schedule[i].CourseID + "</td><td>" + schedule[i].Prereq + "</td><td>" + schedule[i].PrereqMet +"</td></tr>");
+                   var tableString = "<tr><th>" + semester + " " + yearNum + "</th>";
+                   for (var j = 0; j < schedule[i].length; j++) {
+                       tableString += "<td width=\"(100/" + schedule[i].length + ")%\">" + schedule[i][j] + "</td>";
+                   }
+                   tableString += "</tr>"
+                   $("#schedule").append(tableString);
+
+                   if (semester == "Spring") {
+                       semester = "Fall"
+                   }
+                   else {
+                       semester = "Spring";
+                       yearNum += 1;
+                   }
                }
                $("#schedule").append("</table>");
+
+               //$("#schedule").append("</br></br><h2>Schedule</h2>");
+               //$("#schedule").append("<table>");
+               //$("#schedule").append("<tr><th>Course ID</th><th>Prereq</th><th>Prereq Met</th></tr>");
+               //for (var i = 0; i < schedule.length; i++) {
+               //    $("#schedule").append("<tr><td>" + schedule[i].CourseID + "</td><td>" + schedule[i].Prereq + "</td><td>" + schedule[i].PrereqMet +"</td></tr>");
+               //}
+               //$("#schedule").append("</table>");
            })
            .fail(function () {})
     }
@@ -140,6 +177,7 @@
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
 }
 
 #schedule td, #classes th {
@@ -167,6 +205,11 @@
 <div>
     <select id="courses"></select>
     <button class="btn btn-success btn-sm" style="font-size: 15pt;" onclick="addCourse()">Add Course +</button>
+    <br /><br />
+    <form>
+        Number of Elective Hours Taken: 
+        <input type="number" id="electiveHours" min="0" max="30" />
+    </form>
     <br /><br />
 </div>
 

@@ -15,26 +15,34 @@ namespace AdvisementSoftware.Controllers
     {
 
         string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        static Random rand = new Random();
 
         public class Catalog
         {
             public string Year { get; set; }
+            public int ElectiveHours { get; set; }
         }
 
         public class Prerequisite
         {
             public string CourseID { get; set; }
+
+            public string CourseName { get; set; }
             public string Prereq { get; set; } 
 
             public string BooleanExp { get; set; }
 
             public bool PrereqMet { get; set; }
 
-            public Prerequisite(string _courseID, string _prereq)
+            public int CreditHours { get; set; }
+
+            public Prerequisite(string _courseID, string _courseName, string _prereq, int _CreditHours)
             {
                 CourseID = _courseID;
+                CourseName = _courseName;
                 Prereq = _prereq;
                 BooleanExp = _prereq;
+                CreditHours = _CreditHours;
             }
         }
 
@@ -42,8 +50,10 @@ namespace AdvisementSoftware.Controllers
         {
             DataTable catalog = new DataTable();
             DataTable userProfile = new DataTable();
+            DataTable eleHours = new DataTable();
             List<Prerequisite> catalogClasses = new List<Prerequisite>();
             List<string> userClasses = new List<string>();
+            List<List<string>> schedule = new List<List<string>>(); 
 
             try
             {
@@ -52,7 +62,7 @@ namespace AdvisementSoftware.Controllers
                 /*Get Catalog*/
 
                 //string getCatalog = "SELECT * FROM CATALOGS WHERE CatalogYear = '" + catalogSelection.Year + "'";
-                string getCatalog = "SELECT CATALOGS.CourseID, COURSES.Prereq FROM CATALOGS INNER JOIN COURSES ON CATALOGS.CourseID = COURSES.CourseID";
+                string getCatalog = "SELECT CATALOGS.CourseID, COURSES.Prereq, COURSES.CreditHours, COURSES.CourseName FROM CATALOGS INNER JOIN COURSES ON CATALOGS.CourseID = COURSES.CourseID WHERE CatalogYear = '" + catalogSelection.Year + "'";
 
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalog, connectionString);
 
@@ -74,11 +84,47 @@ namespace AdvisementSoftware.Controllers
 
                 dataAdapter.Fill(userProfile);
 
+                /*Get Elective Hours*/
+
+                string getElectiveHours = "SELECT ElectiveHours FROM CATALOGELECTIVEHOURS WHERE CATALOGYEAR = '" + catalogSelection.Year + "'";
+
+                dataAdapter = new SqlDataAdapter(getElectiveHours, connectionString);
+
+                commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                eleHours.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(eleHours);
+
+                int requiredElectiveHours = 0;
+
+                Int32.TryParse(eleHours.Rows[0][0].ToString(), out requiredElectiveHours);
+
+                if (catalogSelection.ElectiveHours < requiredElectiveHours)
+                {
+                    int hoursRemaining = requiredElectiveHours - catalogSelection.ElectiveHours;
+
+                    while (hoursRemaining != 0)
+                    {
+                        if (hoursRemaining - 3 >= 0)
+                        {
+                            catalogClasses.Add(new Prerequisite("ELEC1003", "Elective 3 Hour", "", 3));
+                            hoursRemaining -= 3;
+                        }
+                        else
+                        {
+                            catalogClasses.Add(new Prerequisite("ELEC1001", "Elective 1 Hour","", 1));
+                            hoursRemaining -= 1;
+                        }
+
+                    }
+                }
+
                 if (catalog.Rows.Count > 0 && userProfile.Rows.Count > 0)
                 {
                     foreach (DataRow r in catalog.Rows)
                     {
-                        catalogClasses.Add(new Prerequisite(r["CourseID"].ToString(), r["Prereq"].ToString()));
+                        catalogClasses.Add(new Prerequisite(r["CourseID"].ToString(), r["CourseName"].ToString(), r["Prereq"].ToString(), Int32.Parse(r["CreditHours"].ToString())));
                     }
 
                     foreach (DataRow r in userProfile.Rows)
@@ -86,65 +132,16 @@ namespace AdvisementSoftware.Controllers
                         userClasses.Add(r["CourseID"].ToString());
                     }
 
-                    for (int i = catalogClasses.Count - 1; i >= 0; i--)
-                    {
-                        foreach (string s in userClasses)
-                        {
-                            if (s.Equals(catalogClasses[i].CourseID))
-                            {
-                                catalogClasses.RemoveAt(i);
-                                break;
-                            }
-                        }
-                    }
-
                     List<string> allNeededPrereqs = new List<string>();
-                    for (int i = 0; i < catalogClasses.Count; i++)
+
+                    while (catalogClasses.Count > 0)
                     {
-                        Match result = Regex.Match(catalogClasses[i].Prereq, @"([A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9])");
-
-                        List<string> matches = new List<string>();
-                        Match temp = result;
-                        while (temp.Success == true)
-                        {
-                            matches.Add(temp.Value);
-                            allNeededPrereqs.Add(temp.Value);
-                            temp = temp.NextMatch();
-                        }
-
-                        foreach (string s in matches)
-                        {
-                            if (userClasses.Contains(s))
-                            {
-                                //expression.Replace(s, "true");
-                                catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "True");
-                            }
-                            else
-                            {
-                                catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "False");
-                            }
-                        }
-
-                        if (catalogClasses[i].BooleanExp.Length > 0)
-                            catalogClasses[i].BooleanExp = catalogClasses[i].BooleanExp.Replace("&", " and ").Replace("|", " or ").Replace("&&", " and ").Replace("||", " or ").Replace("!true", "False").Replace("!false", "True").Replace("!True", "False").Replace("!False", "True");
-                        else
-                            catalogClasses[i].BooleanExp = "(True)";
-
-                        DataTable dt = new DataTable();
-                        var val = dt.Compute(catalogClasses[i].BooleanExp, string.Empty);
-                        catalogClasses[i].PrereqMet = Convert.ToBoolean(val);
+                        catalogClasses = catalogClasses.OrderBy(item => rand.Next()).ToList();
+                        filter(ref catalogClasses, ref userClasses, ref allNeededPrereqs, ref schedule);
                     }
-                    allNeededPrereqs = allNeededPrereqs.Distinct().ToList();
-
-                    for (int i = allNeededPrereqs.Count - 1; i >= 0; i--)
-                    {
-                        if (userClasses.Contains(allNeededPrereqs[i]))
-                        {
-                            allNeededPrereqs.RemoveAt(i);
-                        }
-                    }
-                    //Console.WriteLine(catalogClasses);
-                    string json = JsonConvert.SerializeObject(catalogClasses);
+                    
+                    //Console.WriteLine(schedule);
+                    string json = JsonConvert.SerializeObject(schedule);
                     return json;
                 }
             }
@@ -153,6 +150,111 @@ namespace AdvisementSoftware.Controllers
                 return null;
             }
             return null;
+        }
+
+        public void filter(ref List<Prerequisite> catalogClasses, ref List<string> userClasses, ref List<string> allNeededPrereqs, ref List<List<string>> schedule)
+        {
+            for (int i = catalogClasses.Count - 1; i >= 0; i--)
+            {
+                foreach (string s in userClasses)
+                {
+                    if (s.Equals(catalogClasses[i].CourseID))
+                    {
+                        catalogClasses.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < catalogClasses.Count; i++)
+            {
+                if (catalogClasses[i].Prereq.Length > 0)
+                    catalogClasses[i].BooleanExp = catalogClasses[i].Prereq;
+                else
+                    catalogClasses[i].BooleanExp = "(True)";
+
+                Match result = Regex.Match(catalogClasses[i].Prereq, @"([A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9])");
+
+                List<string> matches = new List<string>();
+                Match temp = result;
+                while (temp.Success == true)
+                {
+                    matches.Add(temp.Value);
+                    allNeededPrereqs.Add(temp.Value);
+                    temp = temp.NextMatch();
+                }
+
+                foreach (string s in matches)
+                {
+                    if (userClasses.Contains(s))
+                    {
+                        //expression.Replace(s, "true");
+                        catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "True");
+                    }
+                    else
+                    {
+                        catalogClasses[i].BooleanExp = Regex.Replace(catalogClasses[i].BooleanExp, s, "False");
+                    }
+                }
+
+                if (catalogClasses[i].BooleanExp.Length > 0)
+                    catalogClasses[i].BooleanExp = catalogClasses[i].BooleanExp.Replace("&", " and ").Replace("|", " or ").Replace("&&", " and ").Replace("||", " or ").Replace("!true", "False").Replace("!false", "True").Replace("!True", "False").Replace("!False", "True");
+                else
+                    catalogClasses[i].BooleanExp = "(True)";
+
+                DataTable dt = new DataTable();
+                var val = dt.Compute(catalogClasses[i].BooleanExp, string.Empty);
+                catalogClasses[i].PrereqMet = Convert.ToBoolean(val);
+            }
+            allNeededPrereqs = allNeededPrereqs.Distinct().ToList();
+
+            for (int i = allNeededPrereqs.Count - 1; i >= 0; i--)
+            {
+                if (userClasses.Contains(allNeededPrereqs[i]))
+                {
+                    allNeededPrereqs.RemoveAt(i);
+                }
+            }
+
+            /* Next Step Build Schedule */
+            List<string> semester = new List<string>();
+            int creditHours = 0;
+            for (int i = allNeededPrereqs.Count - 1; i >= 0; i--)
+            {
+                for (int j = catalogClasses.Count - 1; j >= 0; j--)
+                {
+                    if (catalogClasses[j].CourseID.Equals(allNeededPrereqs[i]) && catalogClasses[j].PrereqMet == true && creditHours <= 15)
+                    {
+                        creditHours += catalogClasses[i].CreditHours;
+                        semester.Add(allNeededPrereqs[i] + " " + catalogClasses[j].CourseName);
+                        userClasses.Add(allNeededPrereqs[i]);
+                        allNeededPrereqs.RemoveAt(i);
+                        catalogClasses.RemoveAt(j);
+                        break;
+                    }
+                }
+            }
+
+            if (creditHours < 15)
+            {
+                for (int i = catalogClasses.Count - 1; i >= 0; i--)
+                {
+                    if (catalogClasses[i].PrereqMet == true)
+                    {
+                        creditHours += catalogClasses[i].CreditHours;
+                        semester.Add(catalogClasses[i].CourseID + " " + catalogClasses[i].CourseName);
+                        if (catalogClasses[i].CourseID.Contains("ELEC") != true)
+                            userClasses.Add(catalogClasses[i].CourseID);
+                        catalogClasses.RemoveAt(i);
+                    }
+                    if (creditHours >= 15)
+                    {
+                        break;
+                    }
+                }
+            }
+            semester.Insert(0, "Credit Hours " + creditHours.ToString());
+            schedule.Add(semester);
         }
 
         public void addCourse(Course json)
@@ -241,7 +343,8 @@ namespace AdvisementSoftware.Controllers
                             course.CreditHours = temp;
                         }
                     }
-                    courses.Add(course);
+                    if (course.CourseID.Contains("ELEC") != true)
+                        courses.Add(course);
                 }
 
                 string json = JsonConvert.SerializeObject(courses);
