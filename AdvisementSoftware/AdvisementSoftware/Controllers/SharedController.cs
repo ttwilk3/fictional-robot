@@ -36,6 +36,10 @@ namespace AdvisementSoftware.Controllers
 
             public int CreditHours { get; set; }
 
+            public float CourseWeightNumber { get; set; }
+
+            public double Weight { get; set; }
+
             public Prerequisite(string _courseID, string _courseName, string _prereq, int _CreditHours)
             {
                 CourseID = _courseID;
@@ -108,12 +112,16 @@ namespace AdvisementSoftware.Controllers
                     {
                         if (hoursRemaining - 3 >= 0)
                         {
-                            catalogClasses.Add(new Prerequisite("ELEC1003", "Elective 3 Hour", "", 3));
+                            Prerequisite temp3 = new Prerequisite("ELEC1003", "Elective 3 Hour", "", 3);
+                            temp3.CourseWeightNumber = rand.Next(1, 5) * 1000;
+                            catalogClasses.Add(temp3);
                             hoursRemaining -= 3;
                         }
                         else
                         {
-                            catalogClasses.Add(new Prerequisite("ELEC1001", "Elective 1 Hour","", 1));
+                            Prerequisite temp1 = new Prerequisite("ELEC1001", "Elective 1 Hour", "", 1);
+                            temp1.CourseWeightNumber = rand.Next(1, 5) * 1000;
+                            catalogClasses.Add(temp1);
                             hoursRemaining -= 1;
                         }
 
@@ -124,7 +132,9 @@ namespace AdvisementSoftware.Controllers
                 {
                     foreach (DataRow r in catalog.Rows)
                     {
-                        catalogClasses.Add(new Prerequisite(r["CourseID"].ToString(), r["CourseName"].ToString(), r["Prereq"].ToString(), Int32.Parse(r["CreditHours"].ToString())));
+                        Prerequisite temp = new Prerequisite(r["CourseID"].ToString(), r["CourseName"].ToString(), r["Prereq"].ToString(), Int32.Parse(r["CreditHours"].ToString()));
+                        temp.CourseWeightNumber = Int32.Parse(temp.CourseID.Substring(4));
+                        catalogClasses.Add(temp);
                     }
 
                     foreach (DataRow r in userProfile.Rows)
@@ -136,7 +146,8 @@ namespace AdvisementSoftware.Controllers
 
                     while (catalogClasses.Count > 0)
                     {
-                        catalogClasses = catalogClasses.OrderBy(item => rand.Next()).ToList();
+                        //catalogClasses = catalogClasses.OrderBy(item => rand.Next()).ToList();
+                        catalogClasses.Sort((x, y) => y.CourseWeightNumber.CompareTo(x.CourseWeightNumber));
                         filter(ref catalogClasses, ref userClasses, ref allNeededPrereqs, ref schedule);
                     }
                     
@@ -156,6 +167,12 @@ namespace AdvisementSoftware.Controllers
         {
             for (int i = catalogClasses.Count - 1; i >= 0; i--)
             {
+                if (catalogClasses[i].CourseID.Contains("WELL") || catalogClasses[i].CourseID.Contains("SOSC"))
+                {
+                    catalogClasses[i].CourseWeightNumber = rand.Next(1, 4) * 1000;
+                }
+                else if (catalogClasses[i].CourseID.Contains("CSCI3"))
+                    catalogClasses[i].CourseWeightNumber = rand.Next(2, 4) * 1000;
                 foreach (string s in userClasses)
                 {
                     if (s.Equals(catalogClasses[i].CourseID))
