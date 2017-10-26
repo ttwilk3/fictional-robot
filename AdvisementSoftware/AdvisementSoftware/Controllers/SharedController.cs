@@ -50,6 +50,61 @@ namespace AdvisementSoftware.Controllers
             }
         }
 
+        public class FullCatalog
+        {
+            public string CourseID { get; set; }
+            public string CourseName { get; set; }
+            public int CreditHours { get; set; }
+            public string Area { get; set; }
+        }
+
+        public string getCatalog(Catalog catalogSelection)
+        {
+            DataTable catalog = new DataTable();
+            try
+            {
+                string getCatalog = "SELECT CATALOGS.CourseID, COURSES.CreditHours, COURSES.CourseName, CATALOGS.Area FROM CATALOGS INNER JOIN COURSES ON CATALOGS.CourseID = COURSES.CourseID WHERE CatalogYear = '" + catalogSelection.Year + "'";
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalog, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                catalog.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(catalog);
+
+                List<FullCatalog> fullCata = new List<FullCatalog>();
+
+                foreach (DataRow r in catalog.Rows)
+                {
+                    FullCatalog course = new FullCatalog();
+                    foreach (DataColumn c in catalog.Columns)
+                    {
+                        if (c.ColumnName.Equals("CourseID"))
+                            course.CourseID = r[c.ColumnName.ToString()].ToString();
+                        else if (c.ColumnName.Equals("CourseName"))
+                            course.CourseName = r[c.ColumnName.ToString()].ToString();
+                        else if (c.ColumnName.Equals("Area"))
+                            course.Area = r[c.ColumnName.ToString()].ToString();
+                        else if (c.ColumnName.Equals("CreditHours"))
+                        {
+                            int temp = 0;
+                            Int32.TryParse(r[c.ColumnName.ToString()].ToString(), out temp);
+                            course.CreditHours = temp;
+                        }
+                    }
+                    fullCata.Add(course);
+                }
+
+                string json = JsonConvert.SerializeObject(fullCata);
+                return json;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public string generateSchedule(Catalog catalogSelection)
         {
             DataTable catalog = new DataTable();
@@ -432,6 +487,31 @@ namespace AdvisementSoftware.Controllers
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        public string getGeneralElectiveHours(Catalog catalogSelection)
+        {
+            string userName = User.Identity.Name;
+            DataTable table = new DataTable();
+            string findHours = "SELECT ElectiveHours FROM CATALOGELECTIVEHOURS WHERE CatalogYear = '" + catalogSelection.Year + "'";
+            try
+            {
+                string path = System.IO.Directory.GetCurrentDirectory();
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findHours, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(table);
+
+                return table.Rows[0][0].ToString();
+            }
+            catch
+            {
+                return "";
             }
         }
 

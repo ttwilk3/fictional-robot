@@ -3,4 +3,197 @@
 }
 
 <br /><br />
-<img src="~/Content/images/UnderConstruct.jpg"/>
+@*<img src="~/Content/images/UnderConstruct.jpg"/>*@
+<script>
+    function getHours() {
+        var catalogVal = {
+            Year: $("#catalogs").val(),
+        }
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/getGeneralElectiveHours',
+            contentType: 'application/json',
+            data: catalogVal,
+            async: false
+        })
+        .done(function (hours) {
+            //console.log(values);
+            hours = JSON.parse(hours);
+            $('#genElec').empty();
+            $('#genElec').append('<h4>General Elective Hours</h4>');
+            $('#genElec').append(hours);
+        })
+        .fail(function () { })
+    }
+
+    function getCatalog() {
+        var catalogVal = {
+            Year: $("#catalogs").val(),
+        }
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/getCatalog',
+            contentType: 'application/json',
+            data: catalogVal,
+            async: false
+        })
+        .done(function (catalogData) {
+            parsedCatalog = JSON.parse(catalogData);
+            //console.log(parsedCatalog);
+            getHours();
+
+            $('#areaA').empty(); 
+            $('#areaA').append('<h4>Area A</h4>');
+            $('#areaA').append('<table>');
+            $('#areaA').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "A") {
+                    $('#areaA').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaA').append('</table>');
+
+            $('#areaBC').empty();
+            $('#areaBC').append('<h4>Area B/C</h4>');
+            $('#areaBC').append('<table>');
+            $('#areaBC').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "B/C") {
+                    $('#areaBC').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaBC').append('</table>');
+
+            $('#areaD').empty();
+            $('#areaD').append('<h4>Area D</h4>');
+            $('#areaD').append('<table>');
+            $('#areaD').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "D") {
+                    $('#areaD').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaD').append('</table>');
+
+            $('#areaE').empty();
+            $('#areaE').append('<h4>Area E</h4>');
+            $('#areaE').append('<table>');
+            $('#areaE').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "E") {
+                    $('#areaE').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaE').append('</table>');
+
+            $('#areaF').empty();
+            $('#areaF').append('<h4>Area F</h4>');
+            $('#areaF').append('<table>');
+            $('#areaF').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "F") {
+                    $('#areaF').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaF').append('</table>');
+
+            $('#areaCC').empty();
+            $('#areaCC').append('<h4>Area Common Core</h4>');
+            $('#areaCC').append('<table>');
+            $('#areaCC').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "CC") {
+                    $('#areaCC').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaCC').append('</table>');
+
+            $('#areaME').empty();
+            $('#areaME').append('<h4>Area Major Elective</h4>');
+            $('#areaME').append('<table>');
+            $('#areaME').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "ME") {
+                    $('#areaME').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaME').append('</table>');
+
+            $('#areaW').empty();
+            $('#areaW').append('<h4>Area Wellness</h4>');
+            $('#areaW').append('<table>');
+            $('#areaW').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
+            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
+                if (parsedCatalog[i].Area == "W") {
+                    $('#areaW').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
+                    parsedCatalog.splice(i, 1);
+                }
+            }
+            $('#areaW').append('</table>');
+        })
+        .fail(function () { })
+    }
+
+    $(document).ready(function () {
+
+    });
+</script>
+
+<style>
+    #catalog {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+        #catalog td, #catalog th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #catalog tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #catalog tr:hover {
+            background-color: #ddd;
+        }
+
+        #catalog th {
+            padding: 12px 12px 12px 12px;
+            text-align: left;
+            background-color: #4CAF50;
+            color: white;
+        }
+</style>
+
+<div>
+    <select id="catalogs">
+        <option value="20142015">Catalog 2014-2015</option>
+        <option value="20152016">Catalog 2015-2016</option>
+        <option value="20162017">Catalog 2016-2017</option>
+        <option value="20172018">Catalog 2017-2018</option>
+    </select>
+    <!--<a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-success btn-sm" target="_blank" style="font-size: 15pt;">Generate Schedule&raquo;</a>-->
+    <button class="btn btn-success btn-sm" style="font-size: 15pt;" onclick="getCatalog()">Look at Catalog&raquo;</button>
+</div>
+
+<div id="catalog">
+    <div id="areaA"></div>
+    <div id="areaBC"></div>
+    <div id="areaD"></div>
+    <div id="areaE"></div>
+    <div id="areaF"></div>
+    <div id="areaCC"></div>
+    <div id="areaME"></div>
+    <div id="areaW"></div>
+    <div id="genElec"></div>
+</div>
