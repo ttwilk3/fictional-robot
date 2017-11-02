@@ -5,6 +5,30 @@
 <br /><br />
 @*<img src="~/Content/images/UnderConstruct.jpg"/>*@
 <script>
+    var parsedCatalog;
+    function getCatalogYears() {
+        $.ajax({
+            type: 'POST',
+            url: '/Shared/getCatalogYears',
+            contentType: 'application/json',
+            /*data: query,*/
+            async: false
+        })
+        .done(function (years) {
+            //console.log(values);
+            years = JSON.parse(years);
+            for (var i = 0; i < years.length; i++) {
+                var temp = years[i].Year;
+                var str1 = temp.substring(0, 4);
+                var str2 = temp.substring(4);
+
+                $('#catalogList').append('<option value=\'' + years[i].Year + '\'>Catalog ' + str1 + '-' + str2 + '</option>');
+                $('#addCourseToCatalog').append('<option value=\'' + years[i].Year + '\'>Catalog ' + str1 + '-' + str2 + '</option>');
+                $('#copyCatalogList').append('<option value=\'' + years[i].Year + '\'>Catalog ' + str1 + '-' + str2 + '</option>');
+            }
+        })
+        .fail(function () { })
+    }
     function getHours() {
         var catalogVal = {
             Year: $("#catalogs").val(),
@@ -20,7 +44,7 @@
             //console.log(values);
             hours = JSON.parse(hours);
             $('#genElec').empty();
-            $('#genElec').append('<h4>General Elective Hours</h4>');
+            //$('#genElec').append('<h4>General Elective Hours</h4>');
             $('#genElec').append(hours);
         })
         .fail(function () { })
@@ -28,7 +52,7 @@
 
     function getCatalog() {
         var catalogVal = {
-            Year: $("#catalogs").val(),
+            Year: $("#catalogList").val(),
         }
         $.ajax({
             type: 'GET',
@@ -40,113 +64,127 @@
         .done(function (catalogData) {
             parsedCatalog = JSON.parse(catalogData);
             //console.log(parsedCatalog);
+            var areas = ["areaA", "areaBC", "areaD", "areaE", "areaF", "areaCC", "areaME", "areaW"];
+            var dbAreas = ["A", "B/C", "D", "E", "F", "CC", "ME", "W"];
+
+            for (var i = 0; i < areas.length; i++) {
+                var test = [];
+                for (var j = parsedCatalog.length - 1; j >= 0; j--) {
+                    if (parsedCatalog[j].Area == dbAreas[i]) {
+                        test.push(parsedCatalog[j]);
+                        parsedCatalog.splice(j, 1);
+                    }
+                }
+                $("#" + areas[i]).jsGrid({
+                    width: "100%",
+                    height: "400px",
+                    controller: {
+                        loadData: $.noop,
+                        insertItem: $.noop,
+                        updateItem: $.noop,
+                        deleteItem: $.noop
+                    },
+                    inserting: false,
+                    editing: false,
+                    sorting: true,
+                    paging: true,
+                    confirmDeleting: true,
+                    deleteConfirm: "Are you sure?",
+                    deleteItem: function (item) {
+                        var temp = $("#catalogList").val();
+                        var courseDel = {
+                            CatalogYear: temp,
+                            CourseID: item.CourseID
+                        };
+                        console.log(item);
+                        console.log(courseDel);
+                        if (window.confirm("Are you sure?")) {
+                            $.ajax({
+                                type: "POST",
+                                url: '/Shared/deleteCourseFromCatalog',
+                                data: courseDel
+                            });
+                            location.reload();
+                        }
+                    },
+                    data: test,
+                    fields: [
+                        { name: "CourseID" },/*, type: "text", validate: "required" },*/
+                        { name: "CourseName" },/*, type: "text", validate: "required" },*/
+                        { name: "CreditHours" },
+                        { name: "Area" },
+                        { type: "control", editButton: false }
+                    ]
+                });
+            }
             getHours();
-
-            $('#areaA').empty(); 
-            $('#areaA').append('<h4>Area A</h4>');
-            $('#areaA').append('<table>');
-            $('#areaA').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "A") {
-                    $('#areaA').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaA').append('</table>');
-
-            $('#areaBC').empty();
-            $('#areaBC').append('<h4>Area B/C</h4>');
-            $('#areaBC').append('<table>');
-            $('#areaBC').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "B/C") {
-                    $('#areaBC').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaBC').append('</table>');
-
-            $('#areaD').empty();
-            $('#areaD').append('<h4>Area D</h4>');
-            $('#areaD').append('<table>');
-            $('#areaD').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "D") {
-                    $('#areaD').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaD').append('</table>');
-
-            $('#areaE').empty();
-            $('#areaE').append('<h4>Area E</h4>');
-            $('#areaE').append('<table>');
-            $('#areaE').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "E") {
-                    $('#areaE').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaE').append('</table>');
-
-            $('#areaF').empty();
-            $('#areaF').append('<h4>Area F</h4>');
-            $('#areaF').append('<table>');
-            $('#areaF').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "F") {
-                    $('#areaF').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaF').append('</table>');
-
-            $('#areaCC').empty();
-            $('#areaCC').append('<h4>Area Common Core</h4>');
-            $('#areaCC').append('<table>');
-            $('#areaCC').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "CC") {
-                    $('#areaCC').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaCC').append('</table>');
-
-            $('#areaME').empty();
-            $('#areaME').append('<h4>Area Major Elective</h4>');
-            $('#areaME').append('<table>');
-            $('#areaME').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "ME") {
-                    $('#areaME').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaME').append('</table>');
-
-            $('#areaW').empty();
-            $('#areaW').append('<h4>Area Wellness</h4>');
-            $('#areaW').append('<table>');
-            $('#areaW').append('<th>Course ID</th><th>Course Name</th><th>Credit Hours</th><th>Area</th>')
-            for (var i = parsedCatalog.length - 1; i >= 0; i--) {
-                if (parsedCatalog[i].Area == "W") {
-                    $('#areaW').append('<tr><td>' + parsedCatalog[i].CourseID + '</td>' + '<td>' + parsedCatalog[i].CourseName + '</td>' + '<td>' + parsedCatalog[i].CreditHours + '</td>' + '<td>' + parsedCatalog[i].Area + '</td>' + '</tr>');
-                    parsedCatalog.splice(i, 1);
-                }
-            }
-            $('#areaW').append('</table>');
         })
         .fail(function () { })
     }
+    var courses;
+    function getCourses() {
+        $.ajax({
+            type: 'POST',
+            url: '/Shared/getCourses',
+            contentType: 'application/json',
+            /*data: query,*/
+            async: false
+        })
+        .done(function (courseData) {
+            //console.log(values);
+            courses = JSON.parse(courseData);
+        })
+        .fail(function () { })
+    }
+    function getAreas() {
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/getAreas',
+            contentType: 'application/json',
+            /*data: query,*/
+            async: false
+        })
+        .done(function (areas) {
+            //console.log(values);
+            areas = JSON.parse(areas);
+            //console.log(areas);
+            for (var i = 0; i < areas.length; i++) {
+                $('#areas').append('<option value=' + areas[i] + '>' + areas[i] + '</option>');
+            }
+        })
+        .fail(function () { })
+    }
+    function addCourseToCatalog() {
+        var tempCourse = courses[$("#courses").val()];
+        var catalogCourse = {
+            CatalogYear: $('#addCourseToCatalog').val(),
+            CourseID: tempCourse.CourseID,
+            Area: $('#areas').val()
+        };
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/addCourseToCatalog',
+            contentType: 'application/json',
+            data: catalogCourse,
+            async: false
+        })
+           .done(function () {
+               location.reload();
+           })
+           .fail(function () { })
+    }
 
     $(document).ready(function () {
-
+        getCourses();
+        getCatalogYears();
+        getAreas();
+        for (var i = 0; i < courses.length; i++) {
+            $('#courses').append('<option value=' + i + '>' + courses[i].CourseID + ' ' + courses[i].CourseName + '</option>');
+        }
     });
 </script>
 
-<style>
+@*<style>
     #catalog {
         font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
         border-collapse: collapse;
@@ -173,27 +211,77 @@
             background-color: #4CAF50;
             color: white;
         }
-</style>
+</style>*@
 
 <div>
-    <select id="catalogs">
-        <option value="20142015">Catalog 2014-2015</option>
-        <option value="20152016">Catalog 2015-2016</option>
-        <option value="20162017">Catalog 2016-2017</option>
-        <option value="20172018">Catalog 2017-2018</option>
-    </select>
+    <select id="catalogList"></select>
     <!--<a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-success btn-sm" target="_blank" style="font-size: 15pt;">Generate Schedule&raquo;</a>-->
-    <button class="btn btn-success btn-sm" style="font-size: 15pt;" onclick="getCatalog()">Look at Catalog&raquo;</button>
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="getCatalog()">Look at Catalog&raquo;</button>
 </div>
 
 <div id="catalog">
+    <br /><hr />
+    Catalog:
+    <select id="copyCatalogList"></select>
+    Copy:
+    <input type="checkbox" id="copyCatalog" />
+    Catalog Date Range:
+    <input type="number" id="year1" min="2014" max="2050">
+    -
+    <input type="number" id="year2" min="2014" max="2050">
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="">Add New Catalog +</button>
+
+    <br /><br />
+
+    Catalog:
+    <select id="addCourseToCatalog"></select>
+    Course:
+    <select id="courses"></select>
+    Area:
+    <select id="areas"></select>
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourseToCatalog()">Add Course +</button>
+    <br /><hr />
+
+    <h4>Area A</h4>
+    <br />
     <div id="areaA"></div>
+    <hr />
+
+    <h4>Area B/C</h4>
+    <br />
     <div id="areaBC"></div>
+    <hr />
+
+    <h4>Area D</h4>
+    <br />
     <div id="areaD"></div>
+    <hr />
+
+    <h4>Area E</h4>
+    <br />
     <div id="areaE"></div>
+    <hr />
+
+    <h4>Area F</h4>
+    <br />
     <div id="areaF"></div>
+    <hr />
+
+    <h4>Area Common Core</h4>
+    <br />
     <div id="areaCC"></div>
+    <hr />
+
+    <h4>Area Major Elective</h4>
+    <br />
     <div id="areaME"></div>
+    <hr />
+
+    <h4>Area Wellness</h4>
+    <br />
     <div id="areaW"></div>
+    <hr />
+
+    <h4>General Elective Hours</h4>
     <div id="genElec"></div>
 </div>

@@ -99,6 +99,28 @@
         .fail(function () { })
     }
 
+    function getCatalogYears() {
+        $.ajax({
+            type: 'POST',
+            url: '/Shared/getCatalogYears',
+            contentType: 'application/json',
+            /*data: query,*/
+            async: false
+        })
+        .done(function (years) {
+            //console.log(values);
+            years = JSON.parse(years);
+            for (var i = 0; i < years.length; i++) {
+                var temp = years[i].Year;
+                var str1 = temp.substring(0, 4);
+                var str2 = temp.substring(4);
+
+                $('#catalogs').append('<option value=\'' + years[i].Year + '\'>Catalog ' + str1 + '-' + str2 +'</option>');
+            }
+        })
+        .fail(function () { })
+    }
+
     function getCourses() {
         $.ajax({
             type: 'POST',
@@ -118,6 +140,7 @@
     $(document).ready(function () {
         getProfile();
         getCourses();
+        getCatalogYears();
         //console.log(userProfile);
         //console.log(courses);
         for (var i = 0; i < courses.length; i++) {
@@ -158,15 +181,8 @@
                 { name: "CourseID"},/*, type: "text", validate: "required" },*/
                 { name: "CourseName"},/*, type: "text", validate: "required" },*/
                 { name: "CreditHours"},
-                { name: "Comment"},
+                /*{ name: "Comment"},*/
                 { type: "control", editButton: false}
-                /*
-                { name: "Name", type: "text", width: 150, validate: "required" },
-                { name: "Age", type: "number", width: 50 },
-                { name: "Address", type: "text", width: 200 },
-                { name: "Country", type: "select", items: countries, valueField: "Id", textField: "Name" },
-                { name: "Married", type: "checkbox", title: "Is Married", sorting: false },
-                { type: "control" }*/
             ]
         });
     });
@@ -204,7 +220,7 @@
 
 <div>
     <select id="courses"></select>
-    <button class="btn btn-success btn-sm" style="font-size: 15pt;" onclick="addCourse()">Add Course +</button>
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourse()">Add Course +</button>
     <br /><br />
     <form>
         Number of Elective Hours Taken: 
@@ -216,83 +232,13 @@
 <div id="jsGrid"></div>
 <div>
     <select id="catalogs">
-        <option value="20142015">Catalog 2014-2015</option>
+        @*<option value="20142015">Catalog 2014-2015</option>
         <option value="20152016">Catalog 2015-2016</option>
         <option value="20162017">Catalog 2016-2017</option>
-        <option value="20172018">Catalog 2017-2018</option>
+        <option value="20172018">Catalog 2017-2018</option>*@
     </select>
     <!--<a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-success btn-sm" target="_blank" style="font-size: 15pt;">Generate Schedule&raquo;</a>-->
-    <button class="btn btn-success btn-sm" style="font-size: 15pt;"onclick="generateSchedule()">Generate Schedule&raquo;</button>
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;"onclick="generateSchedule()">Generate Schedule&raquo;</button>
 </div>
 
 <div id="schedule"></div>
-<!--<div>
-    <p><a href="" class="btn btn-primary btn-sm">Edit Classes&raquo;</a></p>
-    <table id="classes">
-        <tr>
-            <th>Course ID</th>
-            <th>Course Name</th>
-            <th>Semester/Year</th>
-            <th>Comment</th>
-        </tr>
-        <tr>
-            <td>CSCI 1301</td>
-            <td>Principles of Comp Program I</td>
-            <td>FA 16</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>ENGL 1101</td>
-            <td>College Composition I</td>
-            <td>FA 16</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>MATH 1113</td>
-            <td>Precalculus Mathematics</td>
-            <td>FA 16</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>PHYS 1111</td>
-            <td>Introductory Physics I</td>
-            <td>FA 16</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CSCI 1302</td>
-            <td>Principles of Comp Program II</td>
-            <td>SP 17</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>ENGL 1102</td>
-            <td>College Composition II</td>
-            <td>SP 17</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>MATH 2011</td>
-            <td>Calculus & Analy. Geometry I</td>
-            <td>SP 17</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>PHYS 1112</td>
-            <td>Introductory Physics II</td>
-            <td>SP 17</td>
-            <td></td>
-        </tr>
-    </table>
-    <br />
-    <p>
-        <a href="http://www.augusta.edu/hull/documents/academic_plan_cs.pdf" class="btn btn-primary btn-sm" target="_blank">Generate Schedule&raquo;</a>
-        <select>
-            <option value="C1415">Catalog 2014-2015</option>
-            <option value="C1516">Catalog 2015-2016</option>
-            <option value="C1617">Catalog 2016-2017</option>
-            <option value="C1718">Catalog 2017-2018</option>
-        </select>
-    </p>
-
-</div>-->

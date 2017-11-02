@@ -58,6 +58,43 @@ namespace AdvisementSoftware.Controllers
             public string Area { get; set; }
         }
 
+        public string getCatalogYears()
+        {
+            DataTable catalog = new DataTable();
+            try
+            {
+                string getCatalogYear = "SELECT DISTINCT CatalogYear FROM CATALOGS";
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalogYear, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                catalog.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(catalog);
+
+                List<Catalog> years = new List<Catalog>();
+
+                foreach (DataRow r in catalog.Rows)
+                {
+                    Catalog year = new Catalog();
+                    foreach (DataColumn c in catalog.Columns)
+                    {
+                        if (c.ColumnName.Equals("CatalogYear"))
+                            year.Year = r[c.ColumnName.ToString()].ToString();
+                    }
+                    years.Add(year);
+                }
+
+                string json = JsonConvert.SerializeObject(years);
+                return json;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
         public string getCatalog(Catalog catalogSelection)
         {
             DataTable catalog = new DataTable();
@@ -337,6 +374,92 @@ namespace AdvisementSoftware.Controllers
                 string userID = getUserID();
 
                 string insertCommand = "INSERT INTO USERPROFILE (UserID, CourseID) VALUES ('" + userID + "', '" + json.CourseID + "')";
+
+                SqlCommand ins = new SqlCommand(insertCommand);
+
+                ins.Connection = new SqlConnection(connectionString);
+
+                ins.Connection.Open();
+
+                ins.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public string getAreas()
+        {
+            List<string> areas = new List<string>();
+            DataTable catalog = new DataTable();
+            try
+            {
+                string getCatalogArea = "SELECT DISTINCT Area FROM CATALOGS";
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalogArea, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                catalog.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(catalog);
+
+                foreach (DataRow r in catalog.Rows)
+                {
+                    string temp = "";
+                    foreach (DataColumn c in catalog.Columns)
+                    {
+                        if (c.ColumnName.Equals("Area"))
+                            temp = r[c.ColumnName.ToString()].ToString();
+                    }
+                    areas.Add(temp);
+                }
+
+                string json = JsonConvert.SerializeObject(areas);
+                return json;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public class CatalogDelete
+        {
+            public string CatalogYear { get; set; }
+
+            public string Area { get; set; }
+            public string CourseID { get; set; }
+        }
+
+        public void deleteCourseFromCatalog(CatalogDelete item)
+        {
+            try
+            {
+
+                string delCom = "DELETE FROM CATALOGS WHERE CatalogYear = '" + item.CatalogYear + "' AND CourseID = '" + item.CourseID + "'";
+
+                SqlCommand del = new SqlCommand(delCom);
+
+                del.Connection = new SqlConnection(connectionString);
+
+                del.Connection.Open();
+
+                del.ExecuteNonQuery();
+
+            }
+            catch
+            {
+
+            }
+        }
+
+        public void addCourseToCatalog(CatalogDelete course)
+        {
+            try
+            {
+
+                string insertCommand = "INSERT INTO CATALOGS (CatalogYear, CourseID, Area) VALUES ('" + course.CatalogYear + "', '" + course.CourseID + "', '" + course.Area + "')";
 
                 SqlCommand ins = new SqlCommand(insertCommand);
 
