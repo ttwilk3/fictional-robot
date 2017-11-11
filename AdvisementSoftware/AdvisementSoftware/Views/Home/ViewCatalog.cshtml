@@ -174,6 +174,27 @@
            .fail(function () { })
     }
 
+    function addNewCatalog() {
+        //console.log($('#copyCatalog').is(':checked'));
+        var newCatalog = {
+            CatalogYearCopy: $('#copyCatalogList').val(),
+            CopyCatalog: $('#copyCatalog').is(':checked'),
+            Year: $('#year1').val() + $('#year2').val()
+        };
+
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/addNewCatalog',
+            contentType: 'application/json',
+            data: newCatalog,
+            async: false
+        })
+           .done(function () {
+               location.reload();
+           })
+           .fail(function () { })
+    }
+
     $(document).ready(function () {
         getCourses();
         getCatalogYears();
@@ -220,27 +241,32 @@
 </div>
 
 <div id="catalog">
-    <br /><hr />
-    Catalog:
-    <select id="copyCatalogList"></select>
-    Copy:
-    <input type="checkbox" id="copyCatalog" />
-    Catalog Date Range:
-    <input type="number" id="year1" min="2014" max="2050">
-    -
-    <input type="number" id="year2" min="2014" max="2050">
-    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="">Add New Catalog +</button>
-
+    <form onsubmit="addNewCatalog()">
+        <br /><hr />
+        Catalog:
+        <select id="copyCatalogList"></select>
+        Copy:
+        <input type="checkbox" id="copyCatalog"/>
+        Catalog Date Range:
+        <input type="number" id="year1" min="2014" max="2050" required>
+        -
+        <input type="number" id="year2" min="2014" max="2050" required>
+        <input class="btn btn-primary btn-sm" type="submit" value="Add New Catalog +" />
+        @*<button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addNewCatalog()">Add New Catalog +</button>*@
+    </form>
     <br /><br />
 
-    Catalog:
-    <select id="addCourseToCatalog"></select>
-    Course:
-    <select id="courses"></select>
-    Area:
-    <select id="areas"></select>
-    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourseToCatalog()">Add Course +</button>
-    <br /><hr />
+    <form onsubmit="addCourseToCatalog()">
+        Catalog:
+        <select id="addCourseToCatalog"></select>
+        Course:
+        <select id="courses"></select>
+        Area:
+        <select id="areas"></select>
+        <input class="btn btn-primary btn-sm" type="submit" value="Add Course +" />
+        @*<button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourseToCatalog()">Add Course +</button>*@
+        <br /><hr />
+    </form>
 
     <h4>Area A</h4>
     <br />

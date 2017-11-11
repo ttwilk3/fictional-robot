@@ -4,6 +4,26 @@
 
 <script>
     var courses;
+    var courseSelection;
+
+    function getCourses() {
+        $.ajax({
+            type: 'POST',
+            url: '/Shared/getCourses',
+            contentType: 'application/json',
+            /*data: query,*/
+            async: false
+        })
+        .done(function (courseData) {
+            //console.log(values);
+            courseSelection = JSON.parse(courseData);
+            for (var i = 0; i < courseSelection.length; i++) {
+                $('#courseSelect1').append('<option value=' + i + '>' + courseSelection[i].CourseID + ' ' + courseSelection[i].CourseName + '</option>');
+            }
+        })
+        .fail(function () { })
+    }
+
     $(document).ready(function () {
         function callDB() {
             $.ajax({
@@ -20,6 +40,7 @@
             .fail(function () { })
         }
         callDB();
+        getCourses();
         //console.log(courses);
         $("#jsGrid").jsGrid({
             width: "100%",
@@ -46,7 +67,7 @@
     <h2>Course Offerings</h2>
 </div>
 <hr />
-<form>
+<form onsubmit="">
     Course ID:
     <input type="text" id="courseID" pattern="[A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9]" title="XXXX####" required/>
 
@@ -72,11 +93,70 @@
     </select>
 
     <br /><br />
+
+    <script>
+        var courseSelectNum = 1;
+        var lineNum = 1;
+        var Booleans = '<select><option value="&">AND</option><option value="|">OR</option></select>';
+        function addPreq() {
+            courseSelectNum += 1;
+            var courseSel = '<select id="courseSelect' + courseSelectNum + '"></select>';
+            $('#line' + lineNum).append(Booleans);
+            $('#line' + lineNum).append(courseSel);
+            for (var i = 0; i < courseSelection.length; i++) {
+                $('#courseSelect' + courseSelectNum).append('<option value=' + i + '>' + courseSelection[i].CourseID + ' ' + courseSelection[i].CourseName + '</option>');
+            }
+        }
+
+        function newLinePreq() {
+            lineNum += 1;
+            courseSelectNum += 1;
+            $('#prereq').append('<br>');
+            $('#prereq').append(Booleans);
+            $('#prereq').append('<div id="line' + lineNum + '"></div>');
+            
+            var courseSel = '<select id="courseSelect' + courseSelectNum + '"></select>';
+            $('#line' + lineNum).append('<br>');
+            $('#line' + lineNum).append(courseSel);
+            for (var i = 0; i < courseSelection.length; i++) {
+                $('#courseSelect' + courseSelectNum).append('<option value=' + i + '>' + courseSelection[i].CourseID + ' ' + courseSelection[i].CourseName + '</option>');
+            }
+
+            $('#line' + lineNum).append('<button class="btn btn-sm btn-primary" id="butt' + lineNum + '" onclick="addPreq()">Add Prereq +</button>');
+
+            for (var i = 0; i < lineNum; i++) {
+                //$('#butt' + i).prop('disabled', true);
+                $('#butt' + i).remove();
+            }
+        }
+
+        var prereqString = "";
+        function buildPrereqString() {
+            console.log($('#prereq').children());
+
+            var prereqDiv = $('#prereq').children();
+
+            for (var i = 0; i < prereqDiv.length; i++) {
+                var temp = $(prereqDiv[i]).children();
+                console.log(temp);
+                //for (var j = 0; temp.length; j++) {
+                //    console.log($(temp[j]).localName);
+                //}
+            }
+        }
+    </script>
     Prerequisites:
-
-
+    <div id="prereq">
+        <div id="line1">
+            <select id="courseSelect1"></select>
+            <button class="btn btn-sm btn-primary" id="butt1" onclick="addPreq()">Add Prereq +</button>
+        </div>
+    </div>
+    <button class="btn btn-sm btn-primary" onclick="newLinePreq()">Add New Line for Prereq</button>
     <br /><br />
     <input class="btn btn-primary btn-sm" type="submit" value="Add Course +"/>
+
+    @*<button class="btn btn-primary btn-sm" onclick="buildPrereqString()">Blah</button>*@
 </form>
 <hr />
 <div id="jsGrid"></div>

@@ -613,6 +613,78 @@ namespace AdvisementSoftware.Controllers
             }
         }
 
+        public class NewCatalog
+        {
+            public string CatalogYearCopy { get; set; }
+            public bool CopyCatalog { get; set; }
+            public string Year { get; set; }
+        }
+        public void addNewCatalog(NewCatalog catalog)
+        {
+            DataTable copyCat = new DataTable();
+            try
+            {
+                if (catalog.CopyCatalog == true)
+                {
+                    string getCatalog = "SELECT CatalogYear, CourseID, Area FROM CATALOGS WHERE CatalogYear = '" + catalog.CatalogYearCopy + "'";
+
+                    SqlDataAdapter dataAdapter = new SqlDataAdapter(getCatalog, connectionString);
+
+                    SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                    copyCat.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                    dataAdapter.Fill(copyCat);
+
+                    List<CatalogDelete> courses = new List<CatalogDelete>();
+
+                    foreach (DataRow r in copyCat.Rows)
+                    {
+                        CatalogDelete course = new CatalogDelete();
+                        foreach (DataColumn c in copyCat.Columns)
+                        {
+                            if (c.ColumnName.Equals("CatalogYear"))
+                                course.CatalogYear = catalog.Year;
+                            else if (c.ColumnName.Equals("CourseID"))
+                                course.CourseID = r[c.ColumnName.ToString()].ToString();
+                            else if (c.ColumnName.Equals("Area"))
+                                course.Area = r[c.ColumnName.ToString()].ToString();
+                        }
+                        courses.Add(course);
+                    }
+
+                    foreach (CatalogDelete cd in courses)
+                    {
+                        string newCatalog = "INSERT INTO CATALOGS (CatalogYear, CourseID, Area) VALUES ('" + cd.CatalogYear + "', '" + cd.CourseID + "', '" + cd.Area + "')";
+
+                        SqlCommand ins = new SqlCommand(newCatalog);
+
+                        ins.Connection = new SqlConnection(connectionString);
+
+                        ins.Connection.Open();
+
+                        ins.ExecuteNonQuery();
+                    }
+                }
+                else if (catalog.CopyCatalog == false)
+                {
+                    string newCatalog = "INSERT INTO CATALOGS (CatalogYear, CourseID, Area) VALUES ('" + catalog.Year + "', 'ENGL1101', 'A')" ;
+
+                    SqlCommand ins = new SqlCommand(newCatalog);
+
+                    ins.Connection = new SqlConnection(connectionString);
+
+                    ins.Connection.Open();
+
+                    ins.ExecuteNonQuery();
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
         public string getGeneralElectiveHours(Catalog catalogSelection)
         {
             string userName = User.Identity.Name;
