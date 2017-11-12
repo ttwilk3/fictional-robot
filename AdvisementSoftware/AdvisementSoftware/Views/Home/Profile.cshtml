@@ -1,6 +1,9 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@{
+    bool canSearch = User.IsInRole("Admin");
+}
 <script>
     var userProfile;
     var courses;
@@ -84,12 +87,15 @@
            .fail(function () {})
     }
 
-    function getProfile() {
+    function getProfile(name) {
+        console.log(name);
+        var user = { userName: name };
+
         $.ajax({
-            type: 'POST',
+            type: 'GET',
             url: '/Shared/getProfile',
             contentType: 'application/json',
-            /*data: query,*/
+            data: user,
             async: false
         })
         .done(function (profileData) {
@@ -136,9 +142,11 @@
         .fail(function () { })
     }
 
-
     $(document).ready(function () {
-        getProfile();
+        if ("@canSearch" == "False"){
+            getProfile("");
+        }
+
         getCourses();
         getCatalogYears();
         //console.log(userProfile);
@@ -214,7 +222,10 @@
 </style>
 
 <div class="jumbotron">
+@if (@User.IsInRole("Admin") == false)
+{
     <h2>@User.Identity.Name 's Profile</h2>
+}
 </div>
 
 

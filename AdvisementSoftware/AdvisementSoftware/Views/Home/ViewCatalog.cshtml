@@ -176,10 +176,13 @@
 
     function addNewCatalog() {
         //console.log($('#copyCatalog').is(':checked'));
+        var yr = $('#year1').val();
+        var yr2 = $('#year1').val();
+        yr2++;
         var newCatalog = {
             CatalogYearCopy: $('#copyCatalogList').val(),
             CopyCatalog: $('#copyCatalog').is(':checked'),
-            Year: $('#year1').val() + $('#year2').val()
+            Year: yr + yr2
         };
 
         $.ajax({
@@ -241,16 +244,18 @@
 </div>
 
 <div id="catalog">
+@if (@User.IsInRole("Admin"))
+{
     <form onsubmit="addNewCatalog()">
         <br /><hr />
         Catalog:
         <select id="copyCatalogList"></select>
         Copy:
         <input type="checkbox" id="copyCatalog"/>
-        Catalog Date Range:
+        Catalog Year:
         <input type="number" id="year1" min="2014" max="2050" required>
-        -
-        <input type="number" id="year2" min="2014" max="2050" required>
+        @*-
+        <input type="number" id="year2" min="2014" max="2050" required>*@
         <input class="btn btn-primary btn-sm" type="submit" value="Add New Catalog +" />
         @*<button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addNewCatalog()">Add New Catalog +</button>*@
     </form>
@@ -267,7 +272,7 @@
         @*<button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourseToCatalog()">Add Course +</button>*@
         <br /><hr />
     </form>
-
+}
     <h4>Area A</h4>
     <br />
     <div id="areaA"></div>

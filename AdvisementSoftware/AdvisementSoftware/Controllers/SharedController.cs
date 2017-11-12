@@ -503,6 +503,8 @@ namespace AdvisementSoftware.Controllers
             public string CourseName { get; set; }
             public string SemesterOffered { get; set; }
             public int CreditHours { get; set; }
+
+            public string Prereq { get; set; }
         }
         public string getCourses()
         {
@@ -551,6 +553,26 @@ namespace AdvisementSoftware.Controllers
             }
         }
 
+        public void addNewCourse(Course c)
+        {
+            try
+            {
+                string insertCommand = "INSERT INTO COURSES (CourseID, CourseName, SemesterOffered, CreditHours, Prereq) VALUES ('" + c.CourseID + "', '" + c.CourseName + "', '" + c.SemesterOffered + "', '" + c.CreditHours + "', '" + c.Prereq + "')";
+
+                SqlCommand ins = new SqlCommand(insertCommand);
+
+                ins.Connection = new SqlConnection(connectionString);
+
+                ins.Connection.Open();
+
+                ins.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
         public class UserProfile
         {
             public string CourseID { get; set; }
@@ -559,13 +581,22 @@ namespace AdvisementSoftware.Controllers
             public string Comment { get; set; }
         }
 
-        public string getProfile()
+        public class SearchUser
+        {
+            public string userName { get; set; }
+        }
+        public string getProfile(SearchUser u)
         {
             DataTable table = new DataTable();
             string findProfile = "SELECT USERPROFILE.CourseID, COURSES.CourseName, COURSES.CreditHours, USERPROFILE.Comment FROM ASPNETUSERS INNER JOIN USERPROFILE ON USERPROFILE.UserID = '";
             try
             {
-                string userID = getUserID();
+                string userID;
+
+                if (u.userName == null || u.userName == "")
+                    userID = getUserID();
+                else
+                    userID = getUserID(u.userName);
 
                 findProfile += userID + "' INNER JOIN COURSES ON USERPROFILE.CourseID = COURSES.CourseID";
 
@@ -713,6 +744,30 @@ namespace AdvisementSoftware.Controllers
         public string getUserID()
         {
             string userName = User.Identity.Name;
+            DataTable table = new DataTable();
+            string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
+            try
+            {
+                string path = System.IO.Directory.GetCurrentDirectory();
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(table);
+
+                return table.Rows[0][0].ToString();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public string getUserID(string userName)
+        {
             DataTable table = new DataTable();
             string findID = "SELECT Id FROM ASPNETUSERS WHERE Email = '" + userName + "'";
             try
