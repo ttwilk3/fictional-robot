@@ -1,7 +1,9 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+@{
+    bool canSearch = User.IsInRole("Admin");
+}
 <script>
     var courses;
     var courseSelection;
@@ -25,6 +27,26 @@
     }
 
     $(document).ready(function () {
+        var courseFields;
+        if ("@canSearch" == "False") {
+            courseFields = [
+                { name: "CourseID", type: "text" },
+                { name: "CourseName", type: "text" },
+                { name: "SemesterOffered", type: "text" },
+                { name: "CreditHours", type: "text" },
+                //{ name: "Prereq", type: "text"}
+            ];
+        }
+        else if ("@canSearch" == "True") {
+            courseFields = [
+                { name: "CourseID", type: "text" },
+                { name: "CourseName", type: "text" },
+                { name: "SemesterOffered", type: "text" },
+                { name: "CreditHours", type: "text" },
+                //{ name: "Prereq", type: "text"},
+                { type: "control", editButton: false }
+            ];
+        }
         function callDB() {
             $.ajax({
                 type: 'POST',
@@ -46,19 +68,34 @@
             width: "100%",
             height: "500px",
 
+            controller: {
+                loadData: $.noop,
+                insertItem: $.noop,
+                updateItem: $.noop,
+                deleteItem: $.noop
+            },
+
             inserting: false,
             editing: false,
             sorting: true,
             paging: true,
+            confirmDeleting: true,
+            deleteConfirm: "Are you sure?",
+
+            deleteItem: function (item) {
+                if (window.confirm("Are you sure?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: '/Shared/deleteCourse',
+                        data: item
+                    });
+                    location.reload();
+                }
+            },
 
             data: courses,
 
-            fields: [
-                { name: "CourseID", type: "text"},
-                { name: "CourseName", type: "text"},
-                { name: "SemesterOffered", type: "text"},
-                { name: "CreditHours", type: "text"}
-            ]
+            fields: courseFields
         });
     });
 </script>

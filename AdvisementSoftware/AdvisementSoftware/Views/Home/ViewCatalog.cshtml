@@ -3,6 +3,9 @@
 }
 
 <br /><br />
+@{
+    bool canSearch = User.IsInRole("Admin");
+}
 @*<img src="~/Content/images/UnderConstruct.jpg"/>*@
 <script>
     var parsedCatalog;
@@ -31,7 +34,7 @@
     }
     function getHours() {
         var catalogVal = {
-            Year: $("#catalogs").val(),
+            Year: $("#catalogList").val(),
         }
         $.ajax({
             type: 'GET',
@@ -41,7 +44,7 @@
             async: false
         })
         .done(function (hours) {
-            //console.log(values);
+            //console.log(hours);
             hours = JSON.parse(hours);
             $('#genElec').empty();
             //$('#genElec').append('<h4>General Elective Hours</h4>');
@@ -51,6 +54,26 @@
     }
 
     function getCatalog() {
+        var cataFields;
+        if ("@canSearch" == "False") {
+            cataFields = [
+               { name: "CourseID" },/*, type: "text", validate: "required" },*/
+               { name: "CourseName" },/*, type: "text", validate: "required" },*/
+               { name: "CreditHours" },
+               { name: "Area" }
+            ];
+        }
+        else if ("@canSearch" == "True") {
+            cataFields = [
+               { name: "CourseID" },/*, type: "text", validate: "required" },*/
+               { name: "CourseName" },/*, type: "text", validate: "required" },*/
+               { name: "CreditHours" },
+               { name: "Area" },
+               { type: "control", editButton: false }
+            ];
+        }
+
+
         var catalogVal = {
             Year: $("#catalogList").val(),
         }
@@ -108,13 +131,7 @@
                         }
                     },
                     data: test,
-                    fields: [
-                        { name: "CourseID" },/*, type: "text", validate: "required" },*/
-                        { name: "CourseName" },/*, type: "text", validate: "required" },*/
-                        { name: "CreditHours" },
-                        { name: "Area" },
-                        { type: "control", editButton: false }
-                    ]
+                    fields: cataFields
                 });
             }
             getHours();
@@ -154,13 +171,14 @@
         })
         .fail(function () { })
     }
-    function addCourseToCatalog() {
+    function addCourseToCatalogFunc() {
         var tempCourse = courses[$("#courses").val()];
         var catalogCourse = {
             CatalogYear: $('#addCourseToCatalog').val(),
             CourseID: tempCourse.CourseID,
             Area: $('#areas').val()
         };
+        console.log(catalogCourse);
         $.ajax({
             type: 'GET',
             url: '/Shared/addCourseToCatalog',
@@ -261,7 +279,7 @@
     </form>
     <br /><br />
 
-    <form onsubmit="addCourseToCatalog()">
+    <form onsubmit="addCourseToCatalogFunc()">
         Catalog:
         <select id="addCourseToCatalog"></select>
         Course:

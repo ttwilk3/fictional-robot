@@ -21,6 +21,8 @@ namespace AdvisementSoftware.Controllers
         {
             public string Year { get; set; }
             public int ElectiveHours { get; set; }
+
+            public string User { get; set; }
         }
 
         public class Prerequisite
@@ -153,7 +155,12 @@ namespace AdvisementSoftware.Controllers
 
             try
             {
-                string userID = getUserID();
+                string userID;
+
+                if (catalogSelection.User == null || catalogSelection.User == "")
+                    userID = getUserID();
+                else
+                    userID = getUserID(catalogSelection.User);
 
                 /*Get Catalog*/
 
@@ -506,6 +513,28 @@ namespace AdvisementSoftware.Controllers
 
             public string Prereq { get; set; }
         }
+
+        public void deleteCourse (Course courseToBeDeleted)
+        {
+            try
+            {
+
+                string delCom = "DELETE FROM COURSES WHERE CourseID = '" + courseToBeDeleted.CourseID + "'";
+
+                SqlCommand del = new SqlCommand(delCom);
+
+                del.Connection = new SqlConnection(connectionString);
+
+                del.Connection.Open();
+
+                del.ExecuteNonQuery();
+
+            }
+            catch
+            {
+
+            }
+        }
         public string getCourses()
         {
             DataTable table = new DataTable();
@@ -538,6 +567,10 @@ namespace AdvisementSoftware.Controllers
                             int temp = 0;
                             Int32.TryParse(r[c.ColumnName.ToString()].ToString(), out temp);
                             course.CreditHours = temp;
+                        }
+                        else if (c.ColumnName.Equals("Prereq"))
+                        {
+                            course.Prereq = r[c.ColumnName.ToString()].ToString();
                         }
                     }
                     if (course.CourseID.Contains("ELEC") != true)
@@ -735,7 +768,7 @@ namespace AdvisementSoftware.Controllers
 
                 return table.Rows[0][0].ToString();
             }
-            catch
+            catch (Exception e)
             {
                 return "";
             }
@@ -759,6 +792,55 @@ namespace AdvisementSoftware.Controllers
                 dataAdapter.Fill(table);
 
                 return table.Rows[0][0].ToString();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public class Profiles
+        {
+            public string UserName { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+        }
+
+        public string getAllUserProfiles()
+        {
+            DataTable table = new DataTable();
+            string findID = "SELECT UserName, FirstName, LastName FROM ASPNETUSERS";
+            try
+            {
+                string path = System.IO.Directory.GetCurrentDirectory();
+
+                SqlDataAdapter dataAdapter = new SqlDataAdapter(findID, connectionString);
+
+                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
+
+                table.Locale = System.Globalization.CultureInfo.InvariantCulture;
+
+                dataAdapter.Fill(table);
+
+                List<Profiles> ups = new List<Profiles>();
+                foreach (DataRow r in table.Rows)
+                {
+                    Profiles up = new Profiles();
+                    foreach (DataColumn c in table.Columns)
+                    {
+                        if (c.ColumnName.Equals("UserName"))
+                            up.UserName = r[c.ColumnName.ToString()].ToString();
+                        else if (c.ColumnName.Equals("FirstName"))
+                            up.FirstName = r[c.ColumnName.ToString()].ToString();
+                        else if (c.ColumnName.Equals("LastName"))
+                            up.LastName = r[c.ColumnName.ToString()].ToString();
+
+                    }
+                    ups.Add(up);
+                }
+
+                string json = JsonConvert.SerializeObject(ups);
+                return json;
             }
             catch
             {

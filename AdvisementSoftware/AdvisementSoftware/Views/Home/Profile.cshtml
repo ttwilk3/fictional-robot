@@ -7,12 +7,16 @@
 <script>
     var userProfile;
     var courses;
+    var whatUser = "";
+    var scheduleNum = 0;
 
     function generateSchedule() {
         //console.log($("#electiveHours").val());
+        scheduleNum++;
         var catalogVal = {
             Year: $("#catalogs").val(),
-            ElectiveHours: $("#electiveHours").val()
+            ElectiveHours: $("#electiveHours").val(),
+            User: whatUser
             }
         $.ajax({
             type: 'GET',
@@ -41,14 +45,14 @@
 
                $("#schedule").append("</br></br><h2>Schedule</h2>");
                $("#schedule").append("<i><h4 style=\"color:red;\">Based on the " + $("#catalogs").val() + " Catalog</h4></i>");
-               $("#schedule").append("<table>");
+               $("#schedule").append("<table id=\"schedule" + scheduleNum + "\"></table>");
                for (var i = 0; i < schedule.length; i++) {
                    var tableString = "<tr><th>" + semester + " " + yearNum + "</th>";
                    for (var j = 0; j < schedule[i].length; j++) {
                        tableString += "<td width=\"(100/" + schedule[i].length + ")%\">" + schedule[i][j] + "</td>";
                    }
                    tableString += "</tr>"
-                   $("#schedule").append(tableString);
+                   $("#schedule" + scheduleNum).append(tableString);
 
                    if (semester == "Spring") {
                        semester = "Fall"
@@ -58,7 +62,7 @@
                        yearNum += 1;
                    }
                }
-               $("#schedule").append("</table>");
+               //$("#schedule").append("</table>");
 
                //$("#schedule").append("</br></br><h2>Schedule</h2>");
                //$("#schedule").append("<table>");
@@ -88,7 +92,7 @@
     }
 
     function getProfile(name) {
-        console.log(name);
+        //console.log(name);
         var user = { userName: name };
 
         $.ajax({
@@ -99,10 +103,73 @@
             async: false
         })
         .done(function (profileData) {
-            //console.log(values);
+            //console.log(profileData);
             userProfile = JSON.parse(profileData);
         })
         .fail(function () { })
+    }
+
+    function getAllUserProfiles() {
+        $.ajax({
+            type: 'GET',
+            url: '/Shared/getAllUserProfiles',
+            contentType: 'application/json',
+            async: false
+        })
+        .done(function (profileData) {
+            //console.log(values);
+            var profiles = JSON.parse(profileData);
+
+            for (var i = 0; i < profiles.length; i++) {
+                $('#profiles').append('<option value=\'' + profiles[i].UserName + '\'>' + profiles[i].UserName + ' - ' + profiles[i].FirstName + ' ' + profiles[i].LastName + '</option>');
+            }
+        })
+        .fail(function () { })
+    }
+
+    function findPerson() {
+        getProfile($('#profiles').val());
+
+        whatUser = $('#profiles').val();
+
+        $("#jsGrid").jsGrid({
+            width: "100%",
+            height: "400px",
+
+            controller: {
+                loadData: $.noop,
+                insertItem: $.noop,
+                updateItem: $.noop,
+                deleteItem: $.noop
+            },
+
+            inserting: false,
+            editing: false,
+            sorting: true,
+            paging: true,
+            confirmDeleting: true,
+            deleteConfirm: "Are you sure?",
+
+            deleteItem: function (item) {
+                if (window.confirm("Are you sure?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: '/Shared/deleteCourseFromProfile',
+                        data: item
+                    });
+                    location.reload();
+                }
+            },
+
+            data: userProfile,
+
+            fields: [
+                { name: "CourseID" },/*, type: "text", validate: "required" },*/
+                { name: "CourseName" },/*, type: "text", validate: "required" },*/
+                { name: "CreditHours" },
+                /*{ name: "Comment"},*/
+            ]
+        });
     }
 
     function getCatalogYears() {
@@ -146,6 +213,10 @@
         if ("@canSearch" == "False"){
             getProfile("");
         }
+        else {
+            getAllUserProfiles();
+            $('#courseAdd').prop('disabled', true);
+        }
 
         getCourses();
         getCatalogYears();
@@ -186,14 +257,21 @@
             data: userProfile,
 
             fields: [
-                { name: "CourseID"},/*, type: "text", validate: "required" },*/
-                { name: "CourseName"},/*, type: "text", validate: "required" },*/
-                { name: "CreditHours"},
+                { name: "CourseID" },/*, type: "text", validate: "required" },*/
+                { name: "CourseName" },/*, type: "text", validate: "required" },*/
+                { name: "CreditHours" },
                 /*{ name: "Comment"},*/
-                { type: "control", editButton: false}
+                { type: "control", editButton: false }
             ]
         });
     });
+
+    function print() {
+        var myWindow = window.open("", "_blank");
+        myWindow.document.write("<style>#schedule {font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;border-collapse: collapse;width: 100%;table-layout: fixed;}#schedule td, #classes th {border: 1px solid #ddd;padding: 8px;}#schedule tr:nth-child(even){background-color: #f2f2f2;}#schedule tr:hover {background-color: #ddd;}#schedule th {padding: 12px 12px 12px 12px;text-align: left;background-color: rgb(69, 130, 326);color: white;}</style>");
+        myWindow.document.write($('#scheduleHolder').html());
+        //console.log($('#schedule').html());
+    }
 </script>
 
 <style>
@@ -216,25 +294,39 @@
 #schedule th {
     padding: 12px 12px 12px 12px;
     text-align: left;
-    background-color: #4CAF50;
+    background-color: rgb(69, 130, 326);
     color: white;
 }
 </style>
 
-<div class="jumbotron">
 @if (@User.IsInRole("Admin") == false)
 {
-    <h2>@User.Identity.Name 's Profile</h2>
+    <div class="jumbotron">
+        <h2>@User.Identity.Name 's Profile</h2>
+    </div>
 }
-</div>
+else
+{
+    <div class="jumbotron">
+        <h2>Admin Search Profile</h2>
+    </div>
+
+    <div>
+        <select id="profiles"></select>
+        <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="findPerson()">Search Profile</button>
+    </div>
+
+    <br /><br />
+}
+
 
 
 <div>
     <select id="courses"></select>
-    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourse()">Add Course +</button>
+    <button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="addCourse()" id="courseAdd">Add Course +</button>
     <br /><br />
     <form>
-        Number of Elective Hours Taken: 
+        Number of General Elective Hours Taken: 
         <input type="number" id="electiveHours" min="0" max="30" />
     </form>
     <br /><br />
@@ -252,4 +344,6 @@
     <button class="btn btn-primary btn-sm" style="font-size: 12pt;"onclick="generateSchedule()">Generate Schedule&raquo;</button>
 </div>
 
-<div id="schedule"></div>
+<button class="btn btn-primary btn-sm" style="font-size: 12pt;" onclick="print()" id="courseAdd">Print</button>
+
+<div id="scheduleHolder"><div id="schedule"></div></div>
