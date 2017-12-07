@@ -171,7 +171,7 @@
                     Prereq: prereqString
                 }
 
-                if (confirm("Is this correct?\n" + "Course ID: " + newCourse.CourseID + "\nCourseName: " + newCourse.CourseName + "\nSemester Offered: " + newCourse.SemesterOffered + "\nCredit Hours: " + newCourse.CreditHours + "\nPrereq: " + newCourse.Prereq)) {
+                if (confirm("Is this correct?\n" + "Course ID: " + newCourse.CourseID + "\nCourseName: " + newCourse.CourseName + "\nSemester Offered: " + newCourse.SemesterOffered + "\nCredit Hours: " + newCourse.CreditHours + "\nPrereq: " + newCourse.Prereq + "\n Please note that if you use ELEC#### as your course ID then it will note show up as an available course for the catalog or in the course listing.")) {
                     $.ajax({
                         type: 'GET',
                         url: '/Shared/addNewCourse',
@@ -278,6 +278,8 @@
         <button class="btn btn-sm btn-primary" onclick="newLinePreq()" type="button">Add New Line for Prereq</button>
         <br /><br />
         <input class="btn btn-primary btn-sm" type="submit" value="Add Course +" />
+
+        <br /><br /><span style="font-weight:bold; font-style:italic; color:red;">Please note that if you use ELEC#### as your course ID then it will note show up as an available course for the catalog or in the course listing.</span><br />
 
         @*<button class="btn btn-primary btn-sm" onclick="buildPrereqString()">Blah</button>*@
     </form>
